@@ -1,47 +1,32 @@
 import requests
 import pandas as pd
 import streamlit as st
+import json
+from urllib3.exceptions import InsecureRequestWarning
 
 CPD_URL = "https://api.dataplatform.cloud.ibm.com"  # endpoint for anything data-related
 WML_URL = "https://us-south.ml.cloud.ibm.com"  # endpoint for ML serving
 
 
-def authenticate(apikey):
-    """Calls the authentication endpoint for Cloud Pak for Data as a Service,
-    and returns authentication headers if successful.
-    See https://cloud.ibm.com/apidocs/watson-data-api#creating-an-iam-bearer-token.
-    Note this function is not cached by Streamlit since they token eventually expires, so users
-    need to re-authenticate periodically.
-
-    Args:
-        apikey (str): An IBM Cloud API key, obtained from https://cloud.ibm.com/iam/apikeys).
-    Returns:
-        success (bool): Whether authentication was successful
-        headers (dict): If success=True, a dictionary with valid authentication headers. Otherwise, None.
-        error_msg (str): The text response from the authentication request if the request failed.
-    """
-    auth_headers = {
-        'Content-Type': 'application/x-www-form-urlencoded',
-        'Authorization': 'Basic Yng6Yng=',
-    }
-
-    data = {
-        'apikey': apikey,
-        'grant_type': 'urn:ibm:params:oauth:grant-type:apikey'
-    }
-
-    r = requests.post('https://iam.ng.bluemix.net/identity/token', headers=auth_headers, data=data)
+# TODO, cache
+def authenticate(cpd_url, username, password):
+    requests.packages.urllib3.disable_warnings(category=InsecureRequestWarning)
+    payload = {"username": username, "password": password}
+    body = json.dumps(payload)
+    h = {"cache-control": "no-cache", "content-type": "application/json"}
+    # r = (requests.post(cpd_url + "/icp4d-api/v1/authorize", data=body, headers=h, verify=False)).json()
+    r = (requests.post(cpd_url + "/icp4d-api/v1/authorize", data=body, headers=h, verify=False))
+    print('r=',r.json())
 
     if r.ok:
-        headers = {"Authorization": "Bearer " + r.json()['access_token'], "content-type": "application/json"}
+        headers = {"Authorization": "Bearer " + r.json()['token'], "content-type": "application/json"}
         return True, headers, ""
     else:
-        print(r.text)
         return False, None, r.text
 
 
 @st.cache(suppress_st_warning=True)
-def list_projects(headers):
+def list_projects(cpd_url, headers):
     """Calls the project list endpoint of Cloud Pak for Data as a Service,
     and returns a list of projects if successful.
     See https://cloud.ibm.com/apidocs/watson-data-api#projects-list.
@@ -63,7 +48,7 @@ def list_projects(headers):
 
 
 @st.cache(suppress_st_warning=True)
-def list_datasets(headers, project_id):
+def list_datasets(cpd_url, headers, project_id):
     """Calls the search endpoint of Cloud Pak for Data as a Service,
     and returns a list of data assets in a given project if successful.
     See https://cloud.ibm.com/apidocs/watson-data-api#simplesearch.
@@ -100,7 +85,7 @@ def list_datasets(headers, project_id):
 
 
 @st.cache(suppress_st_warning=True)
-def load_dataset(headers, project_id, dataset_id):
+def load_dataset(cpd_url, headers, project_id, dataset_id):
     """Loads into a memory a data asset stored in a Watson Studio project
     on IBM Cloud Pak for Data as a Service.
     Abstracts away three steps:
@@ -146,7 +131,7 @@ def load_dataset(headers, project_id, dataset_id):
 
 
 @st.cache(suppress_st_warning=True)
-def list_spaces(headers):
+def list_spaces(cpd_url, headers):
     """Calls the spaces list endpoint of Cloud Pak for Data as a Service,
     and returns a list of projects if successful.
     See https://cloud.ibm.com/apidocs/watson-data-api#projects-list, /v2/spaces
@@ -169,7 +154,7 @@ def list_spaces(headers):
 
 
 @st.cache(suppress_st_warning=True)
-def list_deployments(headers, space_id):
+def list_deployments(wml_url, headers, space_id):
     """Calls the deployments list endpoint of Cloud Pak for Data as a Service,
     and returns a list of deployments if successful.
     See https://cloud.ibm.com/apidocs/machine-learning#deployments-list.
@@ -195,7 +180,7 @@ def list_deployments(headers, space_id):
 
 
 @st.cache(suppress_st_warning=True)
-def get_deployment_details(headers, space_id, deployment_id):
+def get_deployment_details(wml_url, headers, space_id, deployment_id):
     """Calls the deployment details endpoint of Cloud Pak for Data as a Service,
     then calls the model (resp. function) details for the model (resp. function)
     associated with this deployment.
