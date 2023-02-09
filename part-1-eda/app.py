@@ -16,9 +16,11 @@ The data loaded here is stored and governed in a Watson Studio project on IBM Cl
 """)
 
 st.header("Authenticate and pick a project and dataset")
-apikey = st.text_input("Your IBM Cloud API key", type='password', help='Find your API key [here](https://cloud.ibm.com/iam/apikeys)')
+url = st.text_input("CPD URL", value="https://cpd-cpd-instance.anz-cpd-3d4f8f67f80aab8513fb91608489ed31-0000.au-syd.containers.appdomain.cloud",  type='default')
+username = st.text_input("username", value="jbtang", type='default')
+password = st.text_input("password", type='password')
 
-auth_ok, headers, error_msg = cpd_helpers.authenticate(apikey)
+auth_ok, headers, error_msg = cpd_helpers.authenticate(url, username, password)
 
 if not auth_ok:
     st.error("You could not be authenticated. More details below.")
@@ -26,15 +28,15 @@ if not auth_ok:
         st.write(error_msg)
 else:
     st.success("You are successfully authenticated! Pick a project below.")
-    projects, error_msg = cpd_helpers.list_projects(headers)
+    projects, error_msg = cpd_helpers.list_projects(url, headers)
     _, project_id = st.selectbox("Pick a Watson Studio Project", projects, format_func=lambda x: f"{x[0]} (id: {x[1]}")
 
 if not auth_ok:
     st.write("Please authenticate first.")
 else:
-    datasets, error_msg = cpd_helpers.list_datasets(headers, project_id)
+    datasets, error_msg = cpd_helpers.list_datasets(url, headers, project_id)
     _, dataset_id = st.selectbox("Pick a Dataset to analyze", datasets, format_func=lambda x: f"{x[0]} (id: {x[1]}")
-    df, error_msg = cpd_helpers.load_dataset(headers, project_id, dataset_id)    
+    df, error_msg = cpd_helpers.load_dataset(url, headers, project_id, dataset_id)
 
 st.header("Dataset preview")
 if auth_ok:

@@ -1,42 +1,27 @@
 import requests
 import pandas as pd
+import json
+from urllib3.exceptions import InsecureRequestWarning
 
-CPD_URL = "https://api.dataplatform.cloud.ibm.com"
-
+# CPD_URL = "https://api.dataplatform.cloud.ibm.com"
 
 # TODO, cache
-def authenticate(apikey):
-    """Calls the authentication endpoint for Cloud Pak for Data as a Service,
-    and returns authentication headers if successful.
-    See https://cloud.ibm.com/apidocs/watson-data-api#creating-an-iam-bearer-token.
-
-    Args:
-        apikey (str): An IBM Cloud API key, obtained from https://cloud.ibm.com/iam/apikeys).
-    Returns:
-        success (bool): Whether authentication was successful
-        headers (dict): If success=True, a dictionary with valid authentication headers. Otherwise, None.
-        error_msg (str): The text response from the authentication request if the request failed.
-    """
-    auth_headers = {
-        'Content-Type': 'application/x-www-form-urlencoded',
-        'Authorization': 'Basic Yng6Yng=',
-    }
-
-    data = {
-        'apikey': apikey,
-        'grant_type': 'urn:ibm:params:oauth:grant-type:apikey'
-    }
-
-    r = requests.post('https://iam.ng.bluemix.net/identity/token', headers=auth_headers, data=data)
+def authenticate(url, username, password):
+    requests.packages.urllib3.disable_warnings(category=InsecureRequestWarning)
+    payload = {"username": username, "password": password}
+    body = json.dumps(payload)
+    h = {"cache-control": "no-cache", "content-type": "application/json"}
+    # r = (requests.post(url + "/icp4d-api/v1/authorize", data=body, headers=h, verify=False)).json()
+    r = (requests.post(url + "/icp4d-api/v1/authorize", data=body, headers=h, verify=False))
+    print('r=',r.json())
 
     if r.ok:
-        headers = {"Authorization": "Bearer " + r.json()['access_token'], "content-type": "application/json"}
+        headers = {"Authorization": "Bearer " + r.json()['token'], "content-type": "application/json"}
         return True, headers, ""
     else:
         return False, None, r.text
 
-
-def list_projects(headers):
+def list_projects(url, headers):
     """Calls the project list endpoint of Cloud Pak for Data as a Service,
     and returns a list of projects if successful.
     See https://cloud.ibm.com/apidocs/watson-data-api#projects-list.
@@ -47,7 +32,7 @@ def list_projects(headers):
         projects (list): A list of (project_name, project_id) tuples.
         error_msg (str): The text response from the request if the request failed.
     """
-    r = requests.get(f"{CPD_URL}/v2/projects", headers=headers, params={"limit": 100})
+    r = requests.get(f"{url}/v2/projects", headers=headers, params={"limit": 100})
     if r.ok:
         projects = r.json()['resources']
         parsed_projects = [(x['entity']['name'], x['metadata']['guid']) for x in projects]
@@ -55,8 +40,7 @@ def list_projects(headers):
     else:
         return list(), r.text
 
-
-def list_datasets(headers, project_id):
+def list_datasets(url, headers, project_id):
     """Calls the search endpoint of Cloud Pak for Data as a Service,
     and returns a list of data assets in a given project if successful.
     See https://cloud.ibm.com/apidocs/watson-data-api#simplesearch.
@@ -79,7 +63,7 @@ def list_datasets(headers, project_id):
             }
         }
     }
-    r = requests.post(f"{CPD_URL}/v3/search",
+    r = requests.post(f"{url}/v3/search",
                       headers=headers,
                       json=search_doc)
 
@@ -92,7 +76,7 @@ def list_datasets(headers, project_id):
 
 
 # TODO cache
-def load_dataset(headers, project_id, dataset_id):
+def load_dataset(url, headers, project_id, dataset_id):
     """Loads into a memory a data asset stored in a Watson Studio project
     on IBM Cloud Pak for Data as a Service.
     Abstracts away three steps:
@@ -109,7 +93,7 @@ def load_dataset(headers, project_id, dataset_id):
         error_msg (str): If any of the HTTP requests fails, the text response from the first failing
             request.
     """
-    r = requests.get(f"{CPD_URL}/v2/data_assets/{dataset_id}",
+    r = requests.get(f"{url}/v2/data_assets/{dataset_id}",
                      params={"project_id": project_id},
                      headers=headers
                     )
@@ -119,7 +103,7 @@ def load_dataset(headers, project_id, dataset_id):
     else:
         return pd.DataFrame(), r.text
 
-    r2 = requests.get(f"{CPD_URL}/v2/assets/{dataset_id}/attachments/{attachment_id}",
+    r2 = requests.get(f"{url}/v2/assets/{dataset_id}/attachments/{attachment_id}",
                       params={"project_id": project_id},
                       headers=headers
                       )
