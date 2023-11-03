@@ -4,9 +4,14 @@ import streamlit as st
 import json
 from urllib3.exceptions import InsecureRequestWarning
 
-CPD_URL = "https://api.dataplatform.cloud.ibm.com"  # endpoint for anything data-related
-WML_URL = "https://us-south.ml.cloud.ibm.com"  # endpoint for ML serving
+# cpd_url = "https://api.dataplatform.cloud.ibm.com"  # endpoint for anything data-related
+# wml_url = "https://us-south.ml.cloud.ibm.com"  # endpoint for ML serving
+# ITZ Squard    rBsBzHXzsDTEb73AFasrJR3KYBeULendqBi2ZwYEE3SQ
+# Felix         426fp5NJycfs3aPlfcnG50oNqIu4kb9ixaEP4s90eMwG
 
+
+# cpd_url = "https://cpd-cpd47x.anz-tech-cpd-3d4f8f67f80aab8513fb91608489ed31-0000.au-syd.containers.appdomain.cloud/"  # endpoint for anything data-related
+# wml_url = "https://cpd-cpd47x.anz-tech-cpd-3d4f8f67f80aab8513fb91608489ed31-0000.au-syd.containers.appdomain.cloud/"  # endpoint for ML serving
 
 # TODO, cache
 def authenticate(cpd_url, username, password):
@@ -24,8 +29,41 @@ def authenticate(cpd_url, username, password):
     else:
         return False, None, r.text
 
+# def authenticate(apikey):
+#     """Calls the authentication endpoint for Cloud Pak for Data as a Service,
+#     and returns authentication headers if successful.
+#     See https://cloud.ibm.com/apidocs/watson-data-api#creating-an-iam-bearer-token.
+#     Note this function is not cached by Streamlit since they token eventually expires, so users
+#     need to re-authenticate periodically.
+#
+#     Args:
+#         apikey (str): An IBM Cloud API key, obtained from https://cloud.ibm.com/iam/apikeys).
+#     Returns:
+#         success (bool): Whether authentication was successful
+#         headers (dict): If success=True, a dictionary with valid authentication headers. Otherwise, None.
+#         error_msg (str): The text response from the authentication request if the request failed.
+#     """
+#     auth_headers = {
+#         'Content-Type': 'application/x-www-form-urlencoded',
+#         'Authorization': 'Basic Yng6Yng=',
+#     }
+#
+#     data = {
+#         'apikey': apikey,
+#         'grant_type': 'urn:ibm:params:oauth:grant-type:apikey'
+#     }
+#
+#     r = requests.post('https://iam.ng.bluemix.net/identity/token', headers=auth_headers, data=data)
+#
+#     if r.ok:
+#         headers = {"Authorization": "Bearer " + r.json()['access_token'], "content-type": "application/json"}
+#         return True, headers, ""
+#     else:
+#         print(r.text)
+#         return False, None, r.text
 
-@st.cache(suppress_st_warning=True)
+
+@st.cache_data
 def list_projects(cpd_url, headers):
     """Calls the project list endpoint of Cloud Pak for Data as a Service,
     and returns a list of projects if successful.
@@ -37,7 +75,7 @@ def list_projects(cpd_url, headers):
         projects (list): A list of (project_name, project_id) tuples.
         error_msg (str): The text response from the request if the request failed.
     """
-    r = requests.get(f"{CPD_URL}/v2/projects", headers=headers, params={"limit": 100})
+    r = requests.get(f"{cpd_url}/v2/projects", headers=headers, params={"limit": 100})
     if r.ok:
         projects = r.json()['resources']
         parsed_projects = [(x['entity']['name'], x['metadata']['guid']) for x in projects]
@@ -47,7 +85,8 @@ def list_projects(cpd_url, headers):
         return list(), r.text
 
 
-@st.cache(suppress_st_warning=True)
+
+@st.cache_data
 def list_datasets(cpd_url, headers, project_id):
     """Calls the search endpoint of Cloud Pak for Data as a Service,
     and returns a list of data assets in a given project if successful.
@@ -71,7 +110,7 @@ def list_datasets(cpd_url, headers, project_id):
             }
         }
     }
-    r = requests.post(f"{CPD_URL}/v3/search",
+    r = requests.post(f"{cpd_url}/v3/search",
                       headers=headers,
                       json=search_doc)
 
@@ -84,7 +123,7 @@ def list_datasets(cpd_url, headers, project_id):
         return list(), r.text
 
 
-@st.cache(suppress_st_warning=True)
+@st.cache_data
 def load_dataset(cpd_url, headers, project_id, dataset_id):
     """Loads into a memory a data asset stored in a Watson Studio project
     on IBM Cloud Pak for Data as a Service.
@@ -102,7 +141,7 @@ def load_dataset(cpd_url, headers, project_id, dataset_id):
         error_msg (str): If any of the HTTP requests fails, the text response from the first failing
             request.
     """
-    r = requests.get(f"{CPD_URL}/v2/data_assets/{dataset_id}",
+    r = requests.get(f"{cpd_url}/v2/data_assets/{dataset_id}",
                      params={"project_id": project_id},
                      headers=headers
                     )
@@ -115,7 +154,7 @@ def load_dataset(cpd_url, headers, project_id, dataset_id):
         print(r.text)
         return pd.DataFrame(), r.text
 
-    r2 = requests.get(f"{CPD_URL}/v2/assets/{dataset_id}/attachments/{attachment_id}",
+    r2 = requests.get(f"{cpd_url}/v2/assets/{dataset_id}/attachments/{attachment_id}",
                       params={"project_id": project_id},
                       headers=headers
                       )
@@ -130,7 +169,7 @@ def load_dataset(cpd_url, headers, project_id, dataset_id):
         return pd.DataFrame(), str(e)
 
 
-@st.cache(suppress_st_warning=True)
+@st.cache_data
 def list_spaces(cpd_url, headers):
     """Calls the spaces list endpoint of Cloud Pak for Data as a Service,
     and returns a list of projects if successful.
@@ -143,7 +182,7 @@ def list_spaces(cpd_url, headers):
         spaces (list): A list of (space_name, space_id) tuples.
         error_msg (str): The text response from the request if the request failed.
     """
-    r = requests.get(f"{CPD_URL}/v2/spaces", headers=headers)
+    r = requests.get(f"{cpd_url}/v2/spaces", headers=headers)
     if r.ok:
         spaces = r.json()['resources']
         parsed_projects = [(x['entity']['name'], x['metadata']['id']) for x in spaces]
@@ -153,7 +192,7 @@ def list_spaces(cpd_url, headers):
         return list(), r.text
 
 
-@st.cache(suppress_st_warning=True)
+@st.cache_data
 def list_deployments(wml_url, headers, space_id):
     """Calls the deployments list endpoint of Cloud Pak for Data as a Service,
     and returns a list of deployments if successful.
@@ -166,7 +205,7 @@ def list_deployments(wml_url, headers, space_id):
         deployments (list): A list of (project_name, project_id) tuples.
         error_msg (str): The text response from the request if the request failed.
     """
-    r = requests.get(f"{WML_URL}/ml/v4/deployments",
+    r = requests.get(f"{wml_url}/ml/v4/deployments",
                      headers=headers,
                      params={"space_id": space_id, "version": "2021-01-01"}
     )
@@ -179,7 +218,7 @@ def list_deployments(wml_url, headers, space_id):
         return list(), r.text
 
 
-@st.cache(suppress_st_warning=True)
+@st.cache_data
 def get_deployment_details(wml_url, headers, space_id, deployment_id):
     """Calls the deployment details endpoint of Cloud Pak for Data as a Service,
     then calls the model (resp. function) details for the model (resp. function)
@@ -196,7 +235,7 @@ def get_deployment_details(wml_url, headers, space_id, deployment_id):
     Returns:
         # TODO
     """
-    r = requests.get(f"{WML_URL}/ml/v4/deployments/{deployment_id}",
+    r = requests.get(f"{wml_url}/ml/v4/deployments/{deployment_id}",
                      headers=headers,
                      params={"space_id": space_id, "version": "2021-01-01"}
     )
@@ -205,7 +244,7 @@ def get_deployment_details(wml_url, headers, space_id, deployment_id):
         asset_id = deployment_details['entity']['asset']['id']
         asset_type = deployment_details['entity']['deployed_asset_type']  # "model" or "function"
 
-        r2 = requests.get(f"{WML_URL}/ml/v4/{asset_type}s/{asset_id}",
+        r2 = requests.get(f"{wml_url}/ml/v4/{asset_type}s/{asset_id}",
                           headers=headers,
                           params={"space_id": space_id, "version": "2021-01-01"}
         )

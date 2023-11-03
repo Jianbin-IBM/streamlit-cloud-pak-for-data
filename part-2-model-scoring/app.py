@@ -13,6 +13,14 @@ st.sidebar.markdown("""
 Welcome to this Exploratory Data Analysis and Model Testing app.
 """)
 
+
+# st.header("Authenticate and pick a project and dataset")
+# url = st.text_input("CPD URL", value="https://cpd-cpd47x.anz-tech-cpd-3d4f8f67f80aab8513fb91608489ed31-0000.au-syd.containers.appdomain.cloud",  type='default')
+# username = st.text_input("username", value="jbtang", type='default')
+# password = st.text_input("password", type='password')
+#
+# auth_ok, headers, error_msg = cpd_helpers.authenticate(url, username, password)
+
 PAGE_MAP = {
     "Data Exploration": data_exploration,
     "Model Testing": model_testing

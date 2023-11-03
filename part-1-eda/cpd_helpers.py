@@ -1,3 +1,5 @@
+# CPD API reference: https://cloud.ibm.com/apidocs/cloud-pak-data/cloud-pak-data-4.5.0#getauthorizationtoken
+
 import requests
 import pandas as pd
 import json

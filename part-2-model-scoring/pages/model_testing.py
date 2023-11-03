@@ -53,16 +53,16 @@ def write_test_predictions(headers, deployment_details, model_details):
 
 
 def write():
-    auth_ok, headers = st.session_state.get('auth_ok', False), st.session_state.get('headers')
+    url, auth_ok, headers = st.session_state.get('url'), st.session_state.get('auth_ok', False), st.session_state.get('headers')
     st.header("Model testing")
     if not auth_ok:
         st.warning("Not so fast! Head to the first page to authenticate and pick a dataset.")
         return
 
-    spaces, error_msg = cpd_helpers.list_spaces(headers)
+    spaces, error_msg = cpd_helpers.list_spaces(url, headers)
     _, space_id = st.selectbox("Pick a Watson Studio Deployment Space", spaces, format_func=format_tuples)
 
-    deployments, error_msg = cpd_helpers.list_deployments(headers, space_id)
+    deployments, error_msg = cpd_helpers.list_deployments(url, headers, space_id)
     if not deployments:
         st.warning("Oops! Looks like this deployment space is empty.")
         return
@@ -70,7 +70,7 @@ def write():
     deployment_name, deployment_id = st.selectbox("Pick a Deployed Model or Function",
                                                   deployments, format_func=format_tuples)
 
-    deployment_details, model_details, error_msg = cpd_helpers.get_deployment_details(headers, space_id, deployment_id)
+    deployment_details, model_details, error_msg = cpd_helpers.get_deployment_details(url, headers, space_id, deployment_id)
     if error_msg != "":
         st.error("An error happened while retrieving details. More details below.")
         with st.expander("Expand to see the error message"):

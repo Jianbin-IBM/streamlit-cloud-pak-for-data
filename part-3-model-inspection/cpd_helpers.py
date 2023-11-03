@@ -24,7 +24,7 @@ def authenticate(cpd_url, username, password):
     else:
         return False, None, r.text
 
-@st.cache(suppress_st_warning=True)
+@st.cache_data(suppress_st_warning=True)
 def list_projects(cpd_url, headers):
     """Calls the project list endpoint of Cloud Pak for Data as a Service,
     and returns a list of projects if successful.
@@ -46,7 +46,7 @@ def list_projects(cpd_url, headers):
         return list(), r.text
 
 
-@st.cache(suppress_st_warning=True)
+@st.cache_data(suppress_st_warning=True)
 def list_datasets(cpd_url, headers, project_id):
     """Calls the search endpoint of Cloud Pak for Data as a Service,
     and returns a list of data assets in a given project if successful.
@@ -83,7 +83,7 @@ def list_datasets(cpd_url, headers, project_id):
         return list(), r.text
 
 
-@st.cache(suppress_st_warning=True)
+@st.cache_data(suppress_st_warning=True)
 def load_dataset(cpd_url, headers, project_id, dataset_id):
     """Loads into a memory a data asset stored in a Watson Studio project
     on IBM Cloud Pak for Data as a Service.
@@ -129,7 +129,7 @@ def load_dataset(cpd_url, headers, project_id, dataset_id):
         return pd.DataFrame(), str(e)
 
 
-@st.cache(suppress_st_warning=True)
+@st.cache_data(suppress_st_warning=True)
 def list_spaces(cpd_url, headers):
     """Calls the spaces list endpoint of Cloud Pak for Data as a Service,
     and returns a list of projects if successful.
@@ -152,7 +152,7 @@ def list_spaces(cpd_url, headers):
         return list(), r.text
 
 
-@st.cache(suppress_st_warning=True)
+@st.cache_data(suppress_st_warning=True)
 def list_deployments(wml_url, headers, space_id):
     """Calls the deployments list endpoint of Cloud Pak for Data as a Service,
     and returns a list of deployments if successful.
@@ -178,7 +178,7 @@ def list_deployments(wml_url, headers, space_id):
         return list(), r.text
 
 
-@st.cache(suppress_st_warning=True)
+@st.cache_data(suppress_st_warning=True)
 def get_deployment_details(wml_url, headers, space_id, deployment_id):
     """Calls the deployment details endpoint of Cloud Pak for Data as a Service,
     then calls the model (resp. function) details for the model (resp. function)
