@@ -21,7 +21,6 @@ def authenticate(cpd_url, username, password):
     h = {"cache-control": "no-cache", "content-type": "application/json"}
     # r = (requests.post(cpd_url + "/icp4d-api/v1/authorize", data=body, headers=h, verify=False)).json()
     r = (requests.post(cpd_url + "/icp4d-api/v1/authorize", data=body, headers=h, verify=False))
-    print('r=',r.json())
 
     if r.ok:
         headers = {"Authorization": "Bearer " + r.json()['token'], "content-type": "application/json"}
@@ -150,6 +149,8 @@ def load_dataset(cpd_url, headers, project_id, dataset_id):
         if dataset_details['entity']['data_asset']['mime_type'] != 'text/csv':
             st.warning("The dataset selected is not in CSV format and cannot be loaded. Please select another one.")
         attachment_id = dataset_details['attachments'][0]['id']
+
+        #print('dataset_details=',dataset_details)
     else:
         print(r.text)
         return pd.DataFrame(), r.text
@@ -164,7 +165,13 @@ def load_dataset(cpd_url, headers, project_id, dataset_id):
         return pd.DataFrame(), r2.text
 
     try:
-        return pd.read_csv(attachment_details['url']), ""
+        #print('attachment_details=', attachment_details)
+
+        df_url = f"{cpd_url}{attachment_details['url']}"
+        # print('df_url = ', df_url)
+        df = pd.read_csv(df_url)
+
+        return df, ""
     except Exception as e:
         return pd.DataFrame(), str(e)
 

@@ -58,9 +58,6 @@ def write():
     if not auth_ok:
         auth_ok, headers, error_msg = cpd_helpers.authenticate(url, username, password)
 
-        print('auth_ok = ', auth_ok)
-        print('headers 1 = ', headers)
-
         # store auth information in the session for other pages to re-use:
         st.session_state['auth_ok'] = auth_ok
         st.session_state['headers'] = headers
@@ -73,7 +70,6 @@ def write():
     else:
         st.success("You are successfully authenticated! Pick a project below.")
 
-        print('headers 2 = ', headers)
         projects, error_msg = cpd_helpers.list_projects(url, headers)
         if projects:
             _, project_id = st.selectbox("Pick a Watson Studio Project", projects, format_func=format_tuples)
@@ -97,6 +93,9 @@ def write():
     df = st.session_state.get('df')
     if auth_ok and st.session_state.get('dataset_picked_flag') and df is None:
         df, error_msg = cpd_helpers.load_dataset(url, headers, project_id, dataset_id)
+
+        # print('JB DF shape=',df.shape)
+
         st.session_state['df'] = df  # used on other pages
 
     st.header("Dataset preview")
@@ -114,4 +113,4 @@ def write():
         x_feature = st.selectbox("Feature (X axis)", features)
 
         write_viz_1(df, x_feature, label)
-        write_viz_2(df, x_feature, label)
+        #write_viz_2(df, x_feature, label)
