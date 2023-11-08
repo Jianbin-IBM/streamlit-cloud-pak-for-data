@@ -5,7 +5,7 @@ from st_aggrid import AgGrid, GridOptionsBuilder, GridUpdateMode
 from utils import format_tuples
 
 
-def write_test_predictions(headers, deployment_details, model_details):
+def write_test_predictions(url, headers, deployment_details, model_details):
     # st.markdown("""
     # ## Test model predictions
     # Pick a row in the table below and click 'Predict' on the right.
@@ -23,7 +23,7 @@ def write_test_predictions(headers, deployment_details, model_details):
     gridOptions = gb.build()
 
     col1, col2 = st.columns(2)
-    print(col1,col2)
+    # print(col1,col2)
     with col1:
         grid_response = AgGrid(
             df,
@@ -96,4 +96,4 @@ def write():
         with st.expander("Expand to see the error message"):
             st.write(error_msg)
     else:
-        write_test_predictions(headers, deployment_details, model_details)
+        write_test_predictions(url, headers, deployment_details, model_details)

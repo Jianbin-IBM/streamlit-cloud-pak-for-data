@@ -8,13 +8,13 @@ import cpd_helpers
 from utils import format_tuples, make_basic_roc_curve, make_advanced_roc_curve, format_autoai_results
 
 
-def write_shap_job_select(headers, model_details):
+def write_shap_job_select(url, headers, model_details):
     project_id, dataset_id = st.session_state.get('project_id'), st.session_state.get('dataset_id')
     if (project_id is None) or (dataset_id is None):
         st.warning("Oops! Looks like you have not selected a project or dataset on the first page yet.")
         return
 
-    jobs, error_msg = cpd_helpers.list_jobs(headers, project_id)
+    jobs, error_msg = cpd_helpers.list_jobs(url, headers, project_id)
     if jobs:
         _, job_id = st.selectbox("Pick a Notebook Job", jobs, format_func=format_tuples)
         n_env_vars = st.number_input("Number of environment variables", min_value=0, value=1, step=1)
@@ -30,7 +30,7 @@ def write_shap_job_select(headers, model_details):
         st.warning("Oops! Looks like there are no jobs in your project yet.")
 
 
-def write_shap_plots(headers, model_details):
+def write_shap_plots(url, headers, model_details):
     st.markdown("""
     ### Inspect your model's SHAP values
     """)
@@ -39,7 +39,7 @@ def write_shap_plots(headers, model_details):
         st.warning("Looks like you haven't precomputed SHAP values yet!\
             You can compute them using the section below")
         with st.expander("Expand to compute SHAP values in Watson Studio"):
-            write_shap_job_select(headers, model_details)
+            write_shap_job_select(url, headers, model_details)
             return
 
     exp = shap.Explanation(np.array(precomputed_shap['values']),
@@ -52,7 +52,7 @@ def write_shap_plots(headers, model_details):
     st.write(fig)
 
 
-def write_other_available_results(headers, model_details):
+def write_other_available_results(url, headers, model_details):
     st.markdown("""
     ### Additional model information (AutoAI only)
     If your model was trained in AutoAI, additional information can be retrieved
@@ -80,15 +80,16 @@ def write_other_available_results(headers, model_details):
 
 def write():
     auth_ok, headers = st.session_state.get('auth_ok', False), st.session_state.get('headers')
+    url = st.session_state.get('url')
     st.header("Model inspection")
     if not auth_ok:
         st.warning("Not so fast! Head to the first page to authenticate and pick a dataset.")
         return
 
-    spaces, error_msg = cpd_helpers.list_spaces(headers)
+    spaces, error_msg = cpd_helpers.list_spaces(url,headers)
     _, space_id = st.selectbox("Pick a Watson Studio Deployment Space", spaces, format_func=format_tuples)
 
-    deployments, error_msg = cpd_helpers.list_deployments(headers, space_id)
+    deployments, error_msg = cpd_helpers.list_deployments(url, headers, space_id)
     if not deployments:
         st.warning("Oops! Looks like this deployment space is empty.")
         return
@@ -96,11 +97,11 @@ def write():
     _, deployment_id = st.selectbox("Pick a Deployed Model or Function",
                                     deployments, format_func=format_tuples)
 
-    deployment_details, model_details, error_msg = cpd_helpers.get_deployment_details(headers, space_id, deployment_id)
+    deployment_details, model_details, error_msg = cpd_helpers.get_deployment_details(url,headers, space_id, deployment_id)
     if error_msg != "":
         st.error("An error happened while retrieving details. More details below.")
         with st.expander("Expand to see the error message"):
             st.write(error_msg)
     else:
-        write_shap_plots(headers, model_details)
-        write_other_available_results(headers, model_details)
+        write_shap_plots(url, headers, model_details)
+        write_other_available_results(url, headers, model_details)
