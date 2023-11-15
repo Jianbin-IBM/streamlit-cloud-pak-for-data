@@ -77,7 +77,7 @@ def prediction(headers, endpoint, payload, precision=2):
         class_pred = preds['predictions'][0]['values'][0][-2]
         return (round(proba, precision), class_pred), ""
     else:
-        print(r.text)
+        # print(r.text)
         return (None, None), r.text
 
 
