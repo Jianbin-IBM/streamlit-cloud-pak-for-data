@@ -22,8 +22,8 @@ password = st.text_input("password", type='password')
 
 auth_ok, headers, error_msg = cpd_helpers.authenticate(url, username, password)
 
-print('auth_ok = ', auth_ok)
-print('headers = ', headers)
+#print('auth_ok = ', auth_ok)
+#print('headers = ', headers)
 
 if not auth_ok:
     st.error("You could not be authenticated. More details below.")
@@ -63,19 +63,19 @@ else:
     st.subheader("Univariate distributions per class")
     st.plotly_chart(px.histogram(df, x=x_feature, color=label, marginal='box'))
 
-    st.subheader("Average default rate per feature bin")
-    st.markdown("This plot shows on the x axis a selected feature binned by quantile, \
-        and on the y axis the average rate of the label's positive class in each bin. \
-        The size of the bins can be selected with the slider below.")
-
-    q_length = st.slider("Quantile size", min_value=0.01, max_value=0.5, step=0.01, value=0.05)
-    bins = pd.qcut(df[x_feature], np.arange(0, 1.01, q_length), duplicates='drop')
-    rate_per_bin = df.groupby(bins)[label].value_counts(normalize=True)
-    fig, ax = plt.subplots()
-    rate_per_bin.unstack().plot(kind='bar', stacked=True, ax=ax, rot=45)
-    # adjust tick alignments, see https://stackoverflow.com/questions/35262475/controlling-tick-labels-alignment-in-pandas-boxplot-within-subplots
-    plt.sca(ax)
-    plt.xticks(ha='right')
-    ax.set_xlabel(f"Bins of feature {x_feature}")
-    ax.set_ylabel(f"Average rate of label {label}")
-    st.pyplot(fig)
+    # st.subheader("Average default rate per feature bin")
+    # st.markdown("This plot shows on the x axis a selected feature binned by quantile, \
+    #     and on the y axis the average rate of the label's positive class in each bin. \
+    #     The size of the bins can be selected with the slider below.")
+    #
+    # q_length = st.slider("Quantile size", min_value=0.01, max_value=0.5, step=0.01, value=0.05)
+    # bins = pd.qcut(df[x_feature], np.arange(0, 1.01, q_length), duplicates='drop')
+    # rate_per_bin = df.groupby(bins)[label].value_counts(normalize=True)
+    # fig, ax = plt.subplots()
+    # rate_per_bin.unstack().plot(kind='bar', stacked=True, ax=ax, rot=45)
+    # # adjust tick alignments, see https://stackoverflow.com/questions/35262475/controlling-tick-labels-alignment-in-pandas-boxplot-within-subplots
+    # plt.sca(ax)
+    # plt.xticks(ha='right')
+    # ax.set_xlabel(f"Bins of feature {x_feature}")
+    # ax.set_ylabel(f"Average rate of label {label}")
+    # st.pyplot(fig)

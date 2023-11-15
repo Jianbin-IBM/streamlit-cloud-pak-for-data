@@ -36,7 +36,7 @@ def list_projects(cpd_url, headers):
         projects (list): A list of (project_name, project_id) tuples.
         error_msg (str): The text response from the request if the request failed.
     """
-    r = requests.get(f"{cpd_url}/v2/projects", headers=headers, params={"limit": 100})
+    r = requests.get(f"{cpd_url}/v2/projects", headers=headers, params={"limit": 100}, verify=False)
     if r.ok:
         projects = r.json()['resources']
         parsed_projects = [(x['entity']['name'], x['metadata']['guid']) for x in projects]
@@ -72,7 +72,7 @@ def list_datasets(cpd_url, headers, project_id):
     }
     r = requests.post(f"{cpd_url}/v3/search",
                       headers=headers,
-                      json=search_doc)
+                      json=search_doc, verify=False)
 
     if r.ok:
         datasets = r.json()['rows']
@@ -103,7 +103,7 @@ def load_dataset(cpd_url, headers, project_id, dataset_id):
     """
     r = requests.get(f"{cpd_url}/v2/data_assets/{dataset_id}",
                      params={"project_id": project_id},
-                     headers=headers
+                     headers=headers, verify=False
                     )
     if r.ok:
         dataset_details = r.json()
@@ -116,7 +116,7 @@ def load_dataset(cpd_url, headers, project_id, dataset_id):
 
     r2 = requests.get(f"{cpd_url}/v2/assets/{dataset_id}/attachments/{attachment_id}",
                       params={"project_id": project_id},
-                      headers=headers
+                      headers=headers, verify=False
                       )
     if r2.ok:
         attachment_details = r2.json()
@@ -148,7 +148,7 @@ def list_spaces(cpd_url, headers):
         spaces (list): A list of (space_name, space_id) tuples.
         error_msg (str): The text response from the request if the request failed.
     """
-    r = requests.get(f"{cpd_url}/v2/spaces", headers=headers)
+    r = requests.get(f"{cpd_url}/v2/spaces", headers=headers, verify=False)
     if r.ok:
         spaces = r.json()['resources']
         parsed_projects = [(x['entity']['name'], x['metadata']['id']) for x in spaces]
@@ -173,7 +173,7 @@ def list_deployments(wml_url, headers, space_id):
     """
     r = requests.get(f"{wml_url}/ml/v4/deployments",
                      headers=headers,
-                     params={"space_id": space_id, "version": "2021-01-01"}
+                     params={"space_id": space_id, "version": "2021-01-01"}, verify=False
     )
     if r.ok:
         deployments = r.json()['resources']
@@ -203,7 +203,7 @@ def get_deployment_details(wml_url, headers, space_id, deployment_id):
     """
     r = requests.get(f"{wml_url}/ml/v4/deployments/{deployment_id}",
                      headers=headers,
-                     params={"space_id": space_id, "version": "2021-01-01"}
+                     params={"space_id": space_id, "version": "2021-01-01"}, verify=False
     )
     if r.ok:
         deployment_details = r.json()
@@ -212,7 +212,7 @@ def get_deployment_details(wml_url, headers, space_id, deployment_id):
 
         r2 = requests.get(f"{wml_url}/ml/v4/{asset_type}s/{asset_id}",
                           headers=headers,
-                          params={"space_id": space_id, "version": "2021-01-01"}
+                          params={"space_id": space_id, "version": "2021-01-01"}, verify=False
         )
 
         if r2.ok:

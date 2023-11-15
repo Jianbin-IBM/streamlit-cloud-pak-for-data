@@ -34,7 +34,7 @@ def list_projects(cpd_url, headers):
         projects (list): A list of (project_name, project_id) tuples.
         error_msg (str): The text response from the request if the request failed.
     """
-    r = requests.get(f"{cpd_url}/v2/projects", headers=headers, params={"limit": 100})
+    r = requests.get(f"{cpd_url}/v2/projects", headers=headers, params={"limit": 100}, verify=False)
     if r.ok:
         projects = r.json()['resources']
         parsed_projects = [(x['entity']['name'], x['metadata']['guid']) for x in projects]
@@ -67,7 +67,7 @@ def list_datasets(cpd_url, headers, project_id):
     }
     r = requests.post(f"{cpd_url}/v3/search",
                       headers=headers,
-                      json=search_doc)
+                      json=search_doc, verify=False)
 
     if r.ok:
         datasets = r.json()['rows']
@@ -97,7 +97,7 @@ def load_dataset(cpd_url, headers, project_id, dataset_id):
     """
     r = requests.get(f"{cpd_url}/v2/data_assets/{dataset_id}",
                      params={"project_id": project_id},
-                     headers=headers
+                     headers=headers, verify=False
                     )
     if r.ok:
         dataset_details = r.json()
@@ -107,7 +107,7 @@ def load_dataset(cpd_url, headers, project_id, dataset_id):
 
     r2 = requests.get(f"{cpd_url}/v2/assets/{dataset_id}/attachments/{attachment_id}",
                       params={"project_id": project_id},
-                      headers=headers
+                      headers=headers, verify=False
                       )
     if r2.ok:
         attachment_details = r2.json()
@@ -115,6 +115,14 @@ def load_dataset(cpd_url, headers, project_id, dataset_id):
         return pd.DataFrame(), r2.text
 
     try:
-        return pd.read_csv(attachment_details['url']), ""
+        # print('attachment_details=', attachment_details)
+
+        df_url = f"{cpd_url}{attachment_details['url']}"
+        # print('df_url = ', df_url)
+        df = pd.read_csv(df_url)
+
+        return df, ""
+
+        #return pd.read_csv(attachment_details['url']), ""
     except Exception as e:
         return pd.DataFrame(), str(e)

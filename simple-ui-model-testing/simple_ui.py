@@ -26,7 +26,7 @@ def authenticate_user_pwd(url, username, password):
         'grant_type': 'urn:ibm:params:oauth:grant-type:apikey'
     }
 
-    r = requests.post(url + '/icp4d-api/v1/authorize', headers=auth_headers, data=data)
+    r = requests.post(url + '/icp4d-api/v1/authorize', headers=auth_headers, data=data, verify=False)
 
     if r.ok:
         headers = {"Authorization": "Bearer " + r.json()['access_token'], "content-type": "application/json"}
@@ -66,7 +66,7 @@ def prediction(headers, endpoint, payload, precision=2):
 
     r = requests.post(endpoint,
                       headers=headers,
-                      json=payload
+                      json=payload, verify=False
                       )
     if r.ok:
         # note here we are hardcoding prediction parsing for binary classification cases
