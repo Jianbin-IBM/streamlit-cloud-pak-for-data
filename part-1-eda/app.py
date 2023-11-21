@@ -17,6 +17,7 @@ The data loaded here is stored and governed in a Watson Studio project on IBM Cl
 
 st.header("Authenticate and pick a project and dataset")
 url = st.text_input("CPD URL", value="https://cpd-cpd47x.anz-tech-cpd-3d4f8f67f80aab8513fb91608489ed31-0000.au-syd.containers.appdomain.cloud",  type='default')
+url = url.rstrip('/')
 username = st.text_input("username", value="jbtang", type='default')
 password = st.text_input("password", type='password')
 

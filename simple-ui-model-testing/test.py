@@ -109,8 +109,10 @@ def prediction(headers, endpoint, payload, precision=2):
         return (None, None), r.text
 
 url = 'https://cpd-cpd47x.anz-tech-cpd-3d4f8f67f80aab8513fb91608489ed31-0000.au-syd.containers.appdomain.cloud'
+url = url.rstrip('/')
 username =  'jbtang'
-password = 'jbtang'
+password = ''
+
 
 # auth_ok, headers, error_msg = authenticate_user_pwd(url,username,password)
 #
