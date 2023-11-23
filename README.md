@@ -5,13 +5,6 @@ The goal is to showcase how a Streamlit app can communicate with Watson Studio (
 
 ![predict](https://user-images.githubusercontent.com/18315500/151985079-7b834f4d-e5de-4d2c-85ef-cf0354591783.gif)
 
-
-## Where to find the blog posts
-
-- [Part 1](https://community.ibm.com/community/user/datascience/blogs/jerome-kafrouni/2022/01/26/trust-your-ml-models-with-streamlit-and-ibm-cloud) covers how to read data from Watson Studio and build your first Streamlit app, to showcase key results of Exploratory Data Analysis
-- Part 2 (link published soon) covers how to connect to deployed models and test them from the Streamlit app, as well as Streamlit topics such as adding multiple pages, caching, controlling the UI layout, eetc
-- Part 3 (link published soon) covers how to investigate the behavior of these models using SHAP and Partial Dependence Plots, as well as pushing computations to the Cloud using Notbook jobs in Watson Studio.
-
 ## How to run the app(s) locally
 
 Pick a version to run, and navigate to its folder from your terminal. Then, install the `requirements.txt` and start the app with `streamlit run app.py`.
