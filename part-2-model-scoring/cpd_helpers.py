@@ -309,9 +309,9 @@ def get_deployment_prediction(headers, deployment_details, payload, precision=2)
     }
 
 
-    print('headers=',headers)
-    print('prepared_payload = ',prepared_payload)
-    print('endpoint =',deployment_details['entity']['status']['serving_urls'][0])
+    #print('headers=',headers)
+    #print('prepared_payload = ',prepared_payload)
+    #print('endpoint =',deployment_details['entity']['status']['serving_urls'][0])
 
 
     r = requests.post(deployment_details['entity']['status']['serving_urls'][0],

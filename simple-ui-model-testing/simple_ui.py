@@ -42,7 +42,7 @@ def get_user_token(url, username, password):
     h = {"cache-control": "no-cache", "content-type": "application/json"}
     # r = (requests.post(url + "/icp4d-api/v1/authorize", data=body, headers=h, verify=False)).json()
     r = (requests.post(url + "/icp4d-api/v1/authorize", data=body, headers=h, verify=False))
-    print('r=', r.json())
+    # print('r=', r.json())
 
     if r.ok:
         headers = {"Authorization": "Bearer " + r.json()['token'], "content-type": "application/json"}
@@ -92,7 +92,7 @@ auth_ok, headers, error_msg = get_user_token(url, username, password)
 if not auth_ok:
     st.info("You are not authenticated yet.")
 else:
-    st.success("You are successfully authenticated! Pick a project below.")
+    st.success("You are successfully authenticated! You can copy your ML endpoint below to use your model")
 
 st.header("Test Deployed Model")
 #model_endpoint_2 = st.text_area("Deployed ML Model Endpoint", value="https://cpd-cpd47x.anz-tech-cpd-3d4f8f67f80aab8513fb91608489ed31-0000.au-syd.containers.appdomain.cloud/ml/v4/deployments/43b5ca09-a82a-46b4-a468-c055a9358401/predictions?version=2021-05-01")
