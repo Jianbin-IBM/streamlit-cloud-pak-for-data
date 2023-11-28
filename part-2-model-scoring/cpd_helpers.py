@@ -1,17 +1,27 @@
+# CPD API reference: https://cloud.ibm.com/apidocs/cloud-pak-data/cloud-pak-data-4.5.0#getauthorizationtoken
+# Watson Data API: https://cloud.ibm.com/apidocs/watson-data-api-cpd#other-assets-api-objects
+
 import requests
 import pandas as pd
 import streamlit as st
 import json
 from urllib3.exceptions import InsecureRequestWarning
 
-# cpd_url = "https://api.dataplatform.cloud.ibm.com"  # endpoint for anything data-related
-# wml_url = "https://us-south.ml.cloud.ibm.com"  # endpoint for ML serving
-# ITZ Squard    rBsBzHXzsDTEb73AFasrJR3KYBeULendqBi2ZwYEE3SQ
-# Felix         426fp5NJycfs3aPlfcnG50oNqIu4kb9ixaEP4s90eMwG
+from io import StringIO
+def read_csv_from_url(url):
+    try:
+        # Download the CSV file from the URL with certificate verification disabled
+        response = requests.get(url, verify=False)
 
-
-# cpd_url = "https://cpd-cpd47x.anz-tech-cpd-3d4f8f67f80aab8513fb91608489ed31-0000.au-syd.containers.appdomain.cloud/"  # endpoint for anything data-related
-# wml_url = "https://cpd-cpd47x.anz-tech-cpd-3d4f8f67f80aab8513fb91608489ed31-0000.au-syd.containers.appdomain.cloud/"  # endpoint for ML serving
+        # Check if the request was successful (status code 200)
+        if response.status_code == 200:
+            # Use pandas to read the CSV directly from the response content
+            df = pd.read_csv(StringIO(response.text))
+            return df
+        else:
+            print(f"Failed to download file. Status code: {response.status_code}")
+    except Exception as e:
+        print(f"Error: {e}")
 
 # TODO, cache
 def authenticate(cpd_url, username, password):
@@ -166,10 +176,10 @@ def load_dataset(cpd_url, headers, project_id, dataset_id):
 
     try:
         #print('attachment_details=', attachment_details)
-
         df_url = f"{cpd_url}{attachment_details['url']}"
-        # print('df_url = ', df_url)
-        df = pd.read_csv(df_url)
+        #print('df_url = ', df_url)
+        # df = pd.read_csv(df_url)
+        df = read_csv_from_url(df_url)
 
         return df, ""
     except Exception as e:
@@ -218,7 +228,9 @@ def list_deployments(wml_url, headers, space_id):
     )
     if r.ok:
         deployments = r.json()['resources']
-        parsed_deployments = [(x['entity']['name'], x['metadata']['id']) for x in deployments]
+        parsed_deployments = [(x['entity']['name'], x['metadata']['id']) for x in deployments if 'online' in x['entity']]
+
+        # print('parsed_deployments = ',parsed_deployments)
         return parsed_deployments, ""
     else:
         print(r.text)

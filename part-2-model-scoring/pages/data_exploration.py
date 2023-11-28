@@ -85,33 +85,32 @@ def write():
         datasets, error_msg = cpd_helpers.list_datasets(url, headers, project_id)
         if datasets:
             _, dataset_id = st.selectbox("Pick a Dataset to analyze", datasets, format_func=format_tuples)
-            # by default the state of st.button goes back to False on its own, but we want to check if the user every clicked on it:
-            load_dataset = st.button("Load Dataset")
-            st.session_state['dataset_picked_flag'] = st.session_state.get('dataset_picked_flag') or load_dataset
-        else:
-            st.warning("Oops! Looks like there are no datasets in your project yet.")
-
-    df = st.session_state.get('df')
-    if auth_ok and st.session_state.get('dataset_picked_flag') and df is None:
-        df, error_msg = cpd_helpers.load_dataset(url, headers, project_id, dataset_id)
+            df = st.session_state.get('df')
+            if auth_ok:
+                df, error_msg = cpd_helpers.load_dataset(url, headers, project_id, dataset_id)
 
         # print('JB DF shape=',df.shape)
 
-        st.session_state['df'] = df  # used on other pages
+                st.session_state['df'] = df  # used on other pages
 
-    st.header("Dataset preview")
-    if not (auth_ok and st.session_state.get('dataset_picked_flag')):
-        st.write("Please authenticate and load a dataset first.")
-    else:
-        write_df_sample(df)
+            st.header("Dataset preview")
+            if not (auth_ok):
+                st.write("Please authenticate and load a dataset first.")
+            else:
+                write_df_sample(df)
 
-    st.header("Visualizations")
-    if not (auth_ok and st.session_state.get('dataset_picked_flag')):
-        st.write("Please authenticate and load a dataset first.")
-    else:
-        label = st.selectbox("Label column", list(df.columns))
-        features = [c for c in df.columns if c != label]
-        x_feature = st.selectbox("Feature (X axis)", features)
+            st.header("Visualizations")
+            if not (auth_ok ):
+                st.write("Please authenticate and load a dataset first.")
+            else:
+                label = st.selectbox("Label column", list(df.columns))
+                features = [c for c in df.columns if c != label]
+                x_feature = st.selectbox("Feature (X axis)", features)
 
-        write_viz_1(df, x_feature, label)
-        #write_viz_2(df, x_feature, label)
+                write_viz_1(df, x_feature, label)
+                # write_viz_2(df, x_feature, label)
+
+        else:
+            st.warning("Oops! Looks like there are no datasets in your project yet.")
+
+

@@ -1,12 +1,27 @@
+# CPD API reference: https://cloud.ibm.com/apidocs/cloud-pak-data/cloud-pak-data-4.5.0#getauthorizationtoken
+# Watson Data API: https://cloud.ibm.com/apidocs/watson-data-api-cpd#other-assets-api-objects
+
 import requests
 import pandas as pd
 import streamlit as st
 import json
 from urllib3.exceptions import InsecureRequestWarning
 
-CPD_URL = "https://api.dataplatform.cloud.ibm.com"  # endpoint for anything data-related
-WML_URL = "https://us-south.ml.cloud.ibm.com"  # endpoint for ML serving
+from io import StringIO
+def read_csv_from_url(url):
+    try:
+        # Download the CSV file from the URL with certificate verification disabled
+        response = requests.get(url, verify=False)
 
+        # Check if the request was successful (status code 200)
+        if response.status_code == 200:
+            # Use pandas to read the CSV directly from the response content
+            df = pd.read_csv(StringIO(response.text))
+            return df
+        else:
+            print(f"Failed to download file. Status code: {response.status_code}")
+    except Exception as e:
+        print(f"Error: {e}")
 
 # TODO, cache
 def authenticate(cpd_url, username, password):
@@ -125,11 +140,10 @@ def load_dataset(cpd_url, headers, project_id, dataset_id):
 
     try:
         # print('attachment_details=', attachment_details)
-
         df_url = f"{cpd_url}{attachment_details['url']}"
         # print('df_url = ', df_url)
-        df = pd.read_csv(df_url)
-
+        # df = pd.read_csv(df_url)
+        df = read_csv_from_url(df_url)
         return df, ""
     except Exception as e:
         return pd.DataFrame(), str(e)
